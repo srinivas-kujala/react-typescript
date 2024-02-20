@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import { Link } from 'react-router-dom'
 function NavBar() {
     const contents =
         <nav className="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
@@ -12,10 +12,13 @@ function NavBar() {
                 <div className="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul className="navbar-nav flex-grow-1">
                         <li className="nav-item">
-                            <a className="nav-link text-dark">Home</a>
+                            <Link to={'/'} className="nav-link text-dark">Home</Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link text-dark">Privacy</a>
+                            <Link to={'/Weather'} className="nav-link text-dark">Weather</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link to={'/Privacy'} className="nav-link text-dark">Privacy</Link>
                         </li>
                     </ul>
                 </div>
