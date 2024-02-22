@@ -1,87 +1,53 @@
-import { useEffect, useState } from 'react';
-import '../assets/css/weather.css'
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import '../assets/css/weather.css';
+import { fetchForecastes } from '../store/features/forecastSlice';
+import { AppDispatch, RootState, useAppDispatch } from '../store/store';
 
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
-}
+export default function Weather() {
 
-function Weather() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+    const dispatch: AppDispatch = useAppDispatch();
+    const weatherForecasts = useSelector((state: RootState) => state.forecast.forecasts);
+    const loading = useSelector((state: RootState) => state.forecast.loading);
+    const error = useSelector((state: RootState) => state.forecast.error);
 
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
+    useEffect(() => { dispatch(fetchForecastes()) }, [dispatch]);
 
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tabelLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     return (
         <div>
             <h1 id="tabelLabel">Weather forecast</h1>
             <p>This component demonstrates fetching data from the server.</p>
-            {contents}
+            <table className="table table-striped" aria-labelledby="tabelLabel">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Temp. (C)</th>
+                        <th>Temp. (F)</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        weatherForecasts?.map(forecast =>
+                            <tr key={forecast.date}>
+                                <td>{forecast.date}</td>
+                                <td>{forecast.temperatureC}</td>
+                                <td>{forecast.temperatureF}</td>
+                                <td>{forecast.summary}</td>
+                            </tr>
+                        )
+                    }
+                </tbody>
+            </table>
         </div>
     );
 
-    async function populateWeatherData() {
-        //const response = await fetch('demo/api/Weather/getweatherforecast');
-        //const data = await response.json();
-        setForecasts([
-            {
-                "date": "2024-02-20",
-                "temperatureC": -15,
-                "temperatureF": 6,
-                "summary": "Cool"
-            },
-            {
-                "date": "2024-02-21",
-                "temperatureC": 23,
-                "temperatureF": 73,
-                "summary": "Freezing"
-            },
-            {
-                "date": "2024-02-22",
-                "temperatureC": 39,
-                "temperatureF": 102,
-                "summary": "Sweltering"
-            },
-            {
-                "date": "2024-02-23",
-                "temperatureC": 26,
-                "temperatureF": 78,
-                "summary": "Sweltering"
-            },
-            {
-                "date": "2024-02-24",
-                "temperatureC": 8,
-                "temperatureF": 46,
-                "summary": "Hot"
-            }
-        ]);
-    }
 }
-
-export default Weather;

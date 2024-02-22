@@ -1,43 +1,41 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { IForecast } from "../../interfaces/IForecats"
 
-export interface Weather {
-    id?: number;
-    city: string;
-    temp: number;
-    createdBy: string;
-    createdAt: Date;
-    modifiedBy?: string;
-    modifiedAt?: Date;
+export interface WeatherInitialState {
+    weathers: IForecast[]
 }
 
-interface WeatherState {
-    weathers: Weather[];
-}
-
-const initialState: WeatherState = {
+const initialState: WeatherInitialState = {
     weathers: []
-};
+}
 
 export const WeatherSlice = createSlice({
-    name: "weather",
+    name: 'Weather',
     initialState,
     reducers: {
-        addWeather: (state, action: PayloadAction<
-            {
-                city: string,
-                temp: number,
-                createdBy: string;
-                createdAt: Date;
-            }>) => {
-            state.weathers.push({
-                city: action.payload.city,
-                temp: action.payload.temp,
-                createdBy: action.payload.createdBy,
-                createdAt: action.payload.createdAt
-            })
+        get: (state, action: PayloadAction<IForecast[]>) => {
+            state.weathers = action.payload;
+        },
+        add: (state, action: PayloadAction<IForecast>) => {
+            state.weathers = [...state.weathers, action.payload]
+        },
+        update: (state, action: PayloadAction<IForecast>) => {
+            state.weathers.map((forecast) => {
+                if (forecast.id === action.payload.id) {
+                    return {
+                        ...state.weathers,
+                        ...action.payload,
+                    };
+                } else {
+                    return state.weathers;
+                }
+            });
+        },
+        deleteById: (state, action: PayloadAction<number>) => {
+            state.weathers.filter(({ id }) => id !== action.payload);
         }
     }
 })
 
-export default WeatherSlice.reducer;
-export const { addWeather } = WeatherSlice.actions;
+export const { get, add, update, deleteById } = WeatherSlice.actions
+export default WeatherSlice.reducer
