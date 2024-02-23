@@ -1,12 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import { ForecastSlice } from "./features/forecastSlice";
-import { WeatherSlice } from "./features/weatherSlice";
 
 export const store = configureStore({
     reducer: {
         forecast: ForecastSlice.reducer,
-        weather: WeatherSlice.reducer
     }
 })
 

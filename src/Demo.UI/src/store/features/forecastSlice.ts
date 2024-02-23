@@ -1,4 +1,4 @@
-import { createAsyncThunk, PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { IForecast } from "../../interfaces/IForecats";
 import weatherDataService from "../../services/weatherDataService";
 
@@ -29,8 +29,21 @@ export const ForecastSlice = createSlice({
     name: "ForeCastes",
     initialState,
     reducers: {
-        addForecast: (state, action: PayloadAction<IForecast>) => {
-            state.forecasts = [...state.forecasts, action.payload]
+        addOrUpdateForecast: (state, action: PayloadAction<IForecast>) => {
+            let found: boolean = false;
+            state.forecasts = [
+                ...state.forecasts.filter(forecast => {
+                    if (forecast.date == action.payload.date) {
+                        found = true;
+                    }
+                    else
+                        return forecast;
+                }),
+                Object.assign({}, action.payload)
+            ]
+        },
+        deleteForecast: (state, action: PayloadAction<IForecast>) => {
+            state.forecasts = state.forecasts.filter(forecast => forecast.date !== action.payload.date);
         }
     },
     extraReducers: (builder) => {
@@ -50,5 +63,5 @@ export const ForecastSlice = createSlice({
     },
 })
 
-export const { addForecast } = ForecastSlice.actions;
+export const { addOrUpdateForecast, deleteForecast } = ForecastSlice.actions;
 export default ForecastSlice.reducer;
