@@ -1,14 +1,87 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { IForecast } from "../../interfaces/IForecats";
 import weatherDataService from "../../services/weatherDataService";
+import { IForecast } from "../../entities/Forecast";
 
 export const fetchForecastes = createAsyncThunk<IForecast[], void, { rejectValue: string }>(
     "weather/Forecasts",
     async (_, thunkAPI) => {
+        let errorMessage: string = '';
         try {
-            return weatherDataService.getForcastes()
+            let entities: IForecast[] = [];
+            await weatherDataService.getForcastes()
+                .then(x => {
+                    entities = x;
+                })
+            return entities;
+
         } catch (error) {
-            return thunkAPI.rejectWithValue("Failed to fetch.");
+            return thunkAPI.rejectWithValue(`Failed to fecth. Error occured : [${errorMessage}]`);
+        }
+    }
+);
+
+export const addWeather = createAsyncThunk(
+    "weather/addWeather",
+    async (data: IForecast, thunkAPI) => {
+        let response = { success: false, entity: data };
+        try {
+            await weatherDataService.insert(data)
+                .then(x => {
+                    if (x.success) {
+                        response.success = true;
+                    }
+                    else {
+                        thunkAPI.rejectWithValue(x.errorMessage);
+                    }
+                })
+            return response;
+
+        } catch (error) {
+            return thunkAPI.rejectWithValue(`Error occured on api call : [${error}]`);
+        }
+    }
+);
+
+export const updateWeather = createAsyncThunk(
+    "Weather/updateWeather",
+    async (data: IForecast, thunkAPI) => {
+        let response = { success: false, entity: data };
+        try {
+            await weatherDataService.update(data)
+                .then(x => {
+                    if (x.success) {
+                        response.success = true;
+                    }
+                    else {
+                        thunkAPI.rejectWithValue(x.errorMessage);
+                    }
+                })
+            return response;
+
+        } catch (error) {
+            return thunkAPI.rejectWithValue(`Error occured on api call : [${error}]`);
+        }
+    }
+);
+
+export const deleteWeather = createAsyncThunk(
+    "Weather/deleteWeather",
+    async (date: Date, thunkAPI) => {
+        let response = { success: false, date: date };
+        try {
+            await weatherDataService.delete(date.toLocaleString())
+                .then(x => {
+                    if (x.success) {
+                        response.success = true;
+                    }
+                    else {
+                        thunkAPI.rejectWithValue(x.errorMessage);
+                    }
+                })
+            return response;
+
+        } catch (error) {
+            return thunkAPI.rejectWithValue(`Error occured on api call : [${error}]`);
         }
     }
 );
@@ -57,6 +130,41 @@ export const ForecastSlice = createSlice({
                 state.forecasts = action.payload;
             })
             .addCase(fetchForecastes.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Something went wrong';
+            })
+            .addCase(addWeather.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload.success) {
+                    state.forecasts = [...state.forecasts, action.payload.entity]
+                }
+            })
+            .addCase(addWeather.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Something went wrong';
+            })
+            .addCase(updateWeather.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload.success) {
+                    state.forecasts = [
+                        ...state.forecasts.filter(forecast => {
+                            if (forecast.date !== action.payload.entity.date)
+                                return forecast;
+                        }),
+                        Object.assign({}, action.payload.entity)
+                    ]
+                }
+            })
+            .addCase(updateWeather.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Something went wrong';
+            }).addCase(deleteWeather.fulfilled, (state, action) => {
+                state.loading = false;
+                if (action.payload.success) {
+                    state.forecasts = state.forecasts.filter(forecast => forecast.date !== action.payload.date);
+                }
+            })
+            .addCase(deleteWeather.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Something went wrong';
             });

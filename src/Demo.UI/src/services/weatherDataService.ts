@@ -1,7 +1,7 @@
 import { IForecast } from "../interfaces/IForecats";
 import { BaseDataService } from "./baseDataService";
 
-class WeatherDataService<T> extends BaseDataService<T> {
+class WeatherDataService extends BaseDataService<IForecast> {
 
     //#region Constructor
 
