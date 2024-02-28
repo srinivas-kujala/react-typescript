@@ -10,12 +10,11 @@ interface ICommonTableProps<T> {
 
 const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
 
+    const [isDisabled, setIsDisabled] = useState<boolean>(true);
     const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
     const [extendableCollection, setExtendableCollection] = useState<any[]>();
 
     const $commonTable = $('#commonTable');
-    const $commonDelete = $('#delete');
-    const $commonStateChange = $('#changeState');
 
     let options: BootstrapTableOptions = {
         multipleSelectRow: true,
@@ -82,48 +81,31 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
     useEffect(() => {
         setExtendableCollection(getExtendableCollection(props.data));
         initializeTable();
+
+        const handleTableEvent = () => {
+            const selections = $commonTable.bootstrapTable('getSelections').map((row: any) => row['rowId']);
+
+            setIsDisabled(!selections.length);
+            setIsDisabled(!selections.length);
+
+            setSelectedRowIds(selectedRowIds);
+            // Your logic to save the data or perform other actions
+        };
+        $commonTable.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', handleTableEvent);
+
+        //$commonTable.on('all.bs.table', function (_e, name, args) {
+        //    console.log(name, args)
+        //});
+        return () => {
+            // Cleanup: Remove event listener when the component is unmounted
+            $commonTable.off('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', handleTableEvent);
+
+            //$commonTable.off('all.bs.table', function (_e, name, args) {
+            //    console.log(name, args)
+            //});
+        };
+
     }, [props.data])
-
-    //$commonTable.on('all.bs.table', function (_e, name, args) {
-    //    console.log(name, args)
-    //});
-
-    $commonDelete.on('click', function () {
-        if (!extendableCollection) {
-            return;
-        }
-
-        $(this).prop('disabled', true);
-
-        let selectedItemData: any[] = [];
-        selectedRowIds.forEach(rowId => {
-            let indexOfItem = extendableCollection.findIndex(x => x.rowId == rowId);
-
-            if (indexOfItem > 0) {
-                selectedItemData.push(props.data[indexOfItem]);
-            }
-        });
-
-        props.onDelete(selectedItemData);
-        $(this).prop('disabled', false);
-    });
-
-    $commonStateChange.on('click', function () {
-        $(this).prop('disabled', true);
-
-        let listOfSelectedItems: any[] = [];
-        let newArrayOfItems: any[] | undefined = extendableCollection?.filter(function (obj: any) {
-            if (selectedRowIds.indexOf(obj.rowId) > -1) {
-                obj.rowState = !obj.rowState;
-                listOfSelectedItems.push(obj);
-            }
-
-            return obj;
-        });
-        setExtendableCollection(newArrayOfItems);
-        setModelData();
-        $(this).prop('disabled', false);
-    });
 
     function getExtendableCollection(data: any[]) {
         if (data.length > 0) {
@@ -135,34 +117,17 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
             }));
         }
     }
+
     function initializeTable() {
 
         $commonTable.bootstrapTable('destroy');
 
         $commonTable.bootstrapTable(options);
 
-        $commonTable.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table',
-            function (e) {
-                e.preventDefault();
-
-                $commonDelete.prop('disabled', !$commonTable.bootstrapTable('getSelections').length);
-                $commonStateChange.prop('disabled', !$commonTable.bootstrapTable('getSelections').length);
-
-                // save your data, here just save the current page
-                let selections = $.map($commonTable.bootstrapTable('getSelections'), function (row) {
-                    return row.rowId
-                })
-                setSelectedRowIds(selections);
-                // push or splice the selections if you want to save all data selections
-            }
-        );
-
         setModelData();
     }
 
     function setModelData() {
-        if (extendableCollection == undefined || extendableCollection?.length <= 0)
-            return;
 
         $commonTable.bootstrapTable('showLoading');
         $commonTable.bootstrapTable('load', extendableCollection);
@@ -208,6 +173,23 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
         return getRowEditHtml('', row.rowId);
     }
 
+    function handleDelete() {
+        setIsDisabled(true);
+
+        let selectedItemData: any[] = [];
+        selectedRowIds.forEach(rowId => {
+            let indexOfItem = extendableCollection?.findIndex(x => x.rowId == rowId);
+
+            if (indexOfItem !== undefined && indexOfItem > 0) {
+                selectedItemData.push(props.data[indexOfItem]);
+            }
+        });
+
+        props.onDelete(selectedItemData);
+
+        setIsDisabled(false);
+    }
+
     return (
         <div className="row paddingtop-10">
             <div className="col-lg-12 col-md-12 col-sm-12">
@@ -216,11 +198,11 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
                         <i className="bi bi-plus-circle-fill"></i>
                         Create
                     </a>
-                    <button id="delete" className="btn btn-danger">
+                    <button id="delete" className="btn btn-danger" disabled={isDisabled} onClick={handleDelete}>
                         <i className="bi bi-trash"></i>
                         Delete
                     </button>
-                    <button id="changeState" className="btn btn-light">
+                    <button id="changeState" className="btn btn-light" disabled={isDisabled}>
                         Activate/Deactivate
                     </button>
                 </div>
