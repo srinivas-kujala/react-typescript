@@ -6,6 +6,7 @@ import { Forecast, IForecast } from '../entities/Forecast';
 import { addOrUpdateForecast, deleteForecast, fetchForecastes } from '../store/features/forecastSlice';
 import { AppDispatch, RootState, useAppDispatch } from '../store/store';
 import CommonModal from '../components/ui/CommonModal';
+import CommonTable from '../components/ui/CommonTable';
 
 export default function Weather() {
 
@@ -122,43 +123,7 @@ export default function Weather() {
                 body={modalBody}
                 footer={modalFooter}
             />
-            <div className="col-lg-12 col-md-12 col-sm-12">
-                <div className="row" id="toolbar">
-                    <div className="col-lg-2 col-md-2 col-sm-2">
-                        <a className="form-control btn btn-dark" id="addForecast" onClick={() => { openModal(true) }}>
-                            <i className="bi bi-play-fill" />
-                            Add
-                        </a>
-                    </div>
-                </div>
-                <table className="table table-striped" aria-labelledby="tabelLabel">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Temp. (C)</th>
-                            <th>Temp. (F)</th>
-                            <th>Summary</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            forecasts?.map((forecast: IForecast) =>
-                                <tr key={forecast?.date?.toLocaleString()}>
-                                    <td>{forecast?.date?.toLocaleString()}</td>
-                                    <td>{forecast.temperatureC}</td>
-                                    <td>{forecast.temperatureF}</td>
-                                    <td>{forecast.summary}</td>
-                                    <td>
-                                        <button className="btn btn-labeled btn-secondary" onClick={() => handleUpdateForecast(forecast)}>Edit</button>
-                                        <button className="btn btn-labeled btn-danger" onClick={() => handleDeleteForecast(forecast)}>Delete</button>
-                                    </td>
-                                </tr>
-                            )
-                        }
-                    </tbody>
-                </table>
-            </div>
+            <CommonTable createHRef="test" data={forecasts} />
         </div>
     );
 
