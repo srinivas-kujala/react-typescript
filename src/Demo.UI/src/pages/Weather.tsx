@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import '../assets/css/weather.css';
-import { Forecast, IForecast } from '../entities/Forecast';
-import { addOrUpdateForecast, deleteForecast, fetchForecastes } from '../store/features/forecastSlice';
-import { AppDispatch, RootState, useAppDispatch } from '../store/store';
 import CommonModal from '../components/ui/CommonModal';
 import CommonTable from '../components/ui/CommonTable';
+import { Forecast, IForecast } from '../entities/Forecast';
+import { addOrUpdateForecast, bulkDeleteForecast, fetchForecastes } from '../store/features/forecastSlice';
+import { AppDispatch, RootState, useAppDispatch } from '../store/store';
 
 export default function Weather() {
 
@@ -72,8 +72,8 @@ export default function Weather() {
         setEntityData(entity);
     }
 
-    const handleDeleteForecast = (entity: IForecast) => {
-        dispatch(deleteForecast(entity));
+    const handleDeleteForecast = (entity: IForecast[]) => {
+        dispatch(bulkDeleteForecast(entity));
     }
 
     const modalHeader =
@@ -123,7 +123,9 @@ export default function Weather() {
                 body={modalBody}
                 footer={modalFooter}
             />
-            <CommonTable createHRef="test" data={forecasts} />
+            <CommonTable createHRef="test"
+                data={forecasts}
+                onDelete={handleDeleteForecast} />
         </div>
     );
 

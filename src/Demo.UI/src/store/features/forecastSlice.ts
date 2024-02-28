@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import weatherDataService from "../../services/weatherDataService";
-import { IForecast } from "../../entities/Forecast";
+import { Forecast, IForecast } from "../../entities/Forecast";
 
 export const fetchForecastes = createAsyncThunk<IForecast[], void, { rejectValue: string }>(
     "weather/Forecasts",
@@ -117,6 +117,20 @@ export const ForecastSlice = createSlice({
         },
         deleteForecast: (state, action: PayloadAction<IForecast>) => {
             state.forecasts = state.forecasts.filter(forecast => forecast.date !== action.payload.date);
+        },
+        bulkDeleteForecast: (state, action: PayloadAction<IForecast[]>) => {
+
+            let currentForecasts: Forecast[] = [...state.forecasts];
+            for (var i = 0; i < action.payload.length; i++) {
+                let forecast: IForecast = action.payload[i];
+
+                let indexOfItemToDelete = currentForecasts.findIndex(x => x.date == forecast.date);
+
+                if (indexOfItemToDelete > 0) {
+                    currentForecasts.splice(indexOfItemToDelete, 1);
+                }
+            }
+            state.forecasts = currentForecasts;
         }
     },
     extraReducers: (builder) => {
@@ -171,5 +185,5 @@ export const ForecastSlice = createSlice({
     },
 })
 
-export const { addOrUpdateForecast, deleteForecast } = ForecastSlice.actions;
+export const { addOrUpdateForecast, deleteForecast, bulkDeleteForecast } = ForecastSlice.actions;
 export default ForecastSlice.reducer;
