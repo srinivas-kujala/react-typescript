@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { IForecast } from "../../entities/Forecast";
 import weatherDataService from "../../services/weatherDataService";
-import { Forecast, IForecast } from "../../entities/Forecast";
 
 export const fetchForecastes = createAsyncThunk<IForecast[], void, { rejectValue: string }>(
     "weather/Forecasts",
@@ -119,18 +119,9 @@ export const ForecastSlice = createSlice({
             state.forecasts = state.forecasts.filter(forecast => forecast.date !== action.payload.date);
         },
         bulkDeleteForecast: (state, action: PayloadAction<IForecast[]>) => {
+            const datesToDelete = action.payload.map(forcast => forcast.date);
 
-            let currentForecasts: Forecast[] = [...state.forecasts];
-            for (var i = 0; i < action.payload.length; i++) {
-                let forecast: IForecast = action.payload[i];
-
-                let indexOfItemToDelete = currentForecasts.findIndex(x => x.date == forecast.date);
-
-                if (indexOfItemToDelete > 0) {
-                    currentForecasts.splice(indexOfItemToDelete, 1);
-                }
-            }
-            state.forecasts = currentForecasts;
+            state.forecasts = state.forecasts.filter(forecast => !datesToDelete.includes(forecast.date));
         }
     },
     extraReducers: (builder) => {

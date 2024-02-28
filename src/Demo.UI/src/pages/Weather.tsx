@@ -72,7 +72,10 @@ export default function Weather() {
         setEntityData(entity);
     }
 
-    const handleDeleteForecast = (entity: IForecast[]) => {
+    const handleUpdateForecasts = (_entities: IForecast[]) => {
+    }
+
+    const handleDeleteForecasts = (entity: IForecast[]) => {
         dispatch(bulkDeleteForecast(entity));
     }
 
@@ -123,9 +126,12 @@ export default function Weather() {
                 body={modalBody}
                 footer={modalFooter}
             />
-            <CommonTable createHRef="test"
+            <CommonTable
+                identifier="date"
+                createHRef="test"
                 data={forecasts}
-                onDelete={handleDeleteForecast} />
+                onDelete={handleDeleteForecasts}
+            />
         </div>
     );
 

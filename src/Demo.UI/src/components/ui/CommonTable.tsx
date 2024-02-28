@@ -3,16 +3,34 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 
 interface ICommonTableProps<T> {
+
+    // #region Public Properties
+
+    identifier: string,
+
+    stateIdentifier?: string;
+
     createHRef: string
-    data: T[],
-    onDelete: (entities: T[]) => void
+
+    data: T;
+
+    // #endregion
+
+    // #region Constructor
+
+    onStatChange?: (entities: T[]) => void;
+
+    onDelete?: (entities: T[]) => void
+
+    // #endregion
+
 }
 
 const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
 
     const [isDisabled, setIsDisabled] = useState<boolean>(true);
-    const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-    const [extendableCollection, setExtendableCollection] = useState<any[]>();
+    const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
+    const [extendableCollection, setExtendableCollection] = useState<any[]>(getExtendableCollection(props.data));
 
     const $commonTable = $('#commonTable');
 
@@ -79,16 +97,15 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
     };
 
     useEffect(() => {
-        setExtendableCollection(getExtendableCollection(props.data));
         initializeTable();
 
         const handleTableEvent = () => {
-            const selections = $commonTable.bootstrapTable('getSelections').map((row: any) => row['rowId']);
+            const selections = $commonTable.bootstrapTable('getSelections').map((row: any) => row[props.identifier]);
 
             setIsDisabled(!selections.length);
             setIsDisabled(!selections.length);
 
-            setSelectedRowIds(selectedRowIds);
+            setSelectedRowIds(selections);
             // Your logic to save the data or perform other actions
         };
         $commonTable.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', handleTableEvent);
@@ -111,10 +128,13 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
         if (data.length > 0) {
             return data.map((item, index) => ({
                 ...item,
-                selected: false,
-                rowId: index,
-                rowState: false
+                rowIndex: index,
+                rowState: false,
+                selected: false
             }));
+        }
+        else {
+            return [];
         }
     }
 
@@ -128,16 +148,21 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
     }
 
     function setModelData() {
+        if (extendableCollection.length > 0) {
+            $commonTable.bootstrapTable('showLoading');
+            $commonTable.bootstrapTable('load', extendableCollection);
+            $commonTable.bootstrapTable('hideLoading');
+        }
+    }
 
-        $commonTable.bootstrapTable('showLoading');
-        $commonTable.bootstrapTable('load', extendableCollection);
-        $commonTable.bootstrapTable('hideLoading');
+    function getStateIdentifierFromProps() {
+        return props?.stateIdentifier ? props.stateIdentifier : 'rowState';
     }
 
     function activeFormatter(value: any, row: any, _index: number) {
         let styleClass = 'text-danger-glow blink';
 
-        if (value && row.active) {
+        if (value && (row.active || row[getStateIdentifierFromProps()])) {
             styleClass = 'text-success-glow';
         }
         return `<div><i class="bi bi-circle-fill ${styleClass}"></i></div>`
@@ -170,22 +195,67 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
     }
 
     function rowEditFormatter(_index: number, _value: any, row: any) {
-        return getRowEditHtml('', row.rowId);
+        return getRowEditHtml('', row[props.identifier]);
     }
 
     function handleDelete() {
         setIsDisabled(true);
 
         let selectedItemData: any[] = [];
-        selectedRowIds.forEach(rowId => {
-            let indexOfItem = extendableCollection?.findIndex(x => x.rowId == rowId);
 
-            if (indexOfItem !== undefined && indexOfItem > 0) {
+        const updatedExtendableCollection = extendableCollection ? [...extendableCollection] : [];
+        selectedRowIds.forEach(identifier => {
+            const indexOfItem = updatedExtendableCollection.findIndex(x => x[props.identifier] === identifier);
+            if (indexOfItem !== -1) {
+
+                // Setect the actual item
                 selectedItemData.push(props.data[indexOfItem]);
+
+                // Remove the extended item
+                updatedExtendableCollection.splice(indexOfItem, 1);
             }
         });
 
-        props.onDelete(selectedItemData);
+        // Invode callback
+        if (props.onDelete)
+            props.onDelete(selectedItemData);
+
+        // Update the state
+        setExtendableCollection(updatedExtendableCollection);
+
+        setIsDisabled(false);
+    }
+
+    function handleStateChange() {
+        setIsDisabled(true);
+
+        let selectedItemData: any[] = [];
+
+        let updatedExtendableCollection: any[] = [];
+        if (extendableCollection) {
+            updatedExtendableCollection = extendableCollection.filter((item, index) => {
+                let identifier = item[props.identifier];
+                if (!selectedRowIds.includes(identifier)) {
+                    return item;
+                }
+                else {
+                    selectedItemData.push(props.data[index]);
+
+                    let stateIdentifier = getStateIdentifierFromProps();
+
+                    item[stateIdentifier] = !item[stateIdentifier]
+
+                    return item;
+                }
+            })
+        }
+
+        // Invode callback
+        if (props.onStatChange)
+            props.onStatChange(selectedItemData);
+
+        // Update the state
+        setExtendableCollection(updatedExtendableCollection);
 
         setIsDisabled(false);
     }
@@ -198,11 +268,11 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
                         <i className="bi bi-plus-circle-fill"></i>
                         Create
                     </a>
-                    <button id="delete" className="btn btn-danger" disabled={isDisabled} onClick={handleDelete}>
+                    <button id="delete" className="btn btn-danger" disabled={isDisabled} onClick={handleDelete} hidden={!props.onDelete}>
                         <i className="bi bi-trash"></i>
                         Delete
                     </button>
-                    <button id="changeState" className="btn btn-light" disabled={isDisabled}>
+                    <button id="changeState" className="btn btn-light" disabled={isDisabled} onClick={handleStateChange} hidden={!props.onStatChange}>
                         Activate/Deactivate
                     </button>
                 </div>
