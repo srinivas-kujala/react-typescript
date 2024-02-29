@@ -1,3 +1,4 @@
+import 'bootstrap-table';
 import { BootstrapTableOptions } from 'bootstrap-table';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -6,21 +7,25 @@ interface ICommonTableProps<T> {
 
     // #region Public Properties
 
-    identifier: string,
+    options: BootstrapTableOptions;
+
+    identifier: string;
 
     stateIdentifier?: string;
-
-    createHRef: string
 
     data: T;
 
     // #endregion
 
-    // #region Constructor
+    // #region Methods
 
-    onStatChange?: (entities: T[]) => void;
+    onCreate?: () => void;
+
+    onEdit?: (id: string) => void | undefined;
 
     onDelete?: (entities: T[]) => void
+
+    onStatChange?: (entities: T[]) => void;
 
     // #endregion
 
@@ -30,73 +35,12 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
 
     const [isDisabled, setIsDisabled] = useState<boolean>(true);
     const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
-    const [extendableCollection, setExtendableCollection] = useState<any[]>(getExtendableCollection(props.data));
+    const [extendableCollection, setExtendableCollection] = useState<any[]>([]);
 
     const $commonTable = $('#commonTable');
 
-    let options: BootstrapTableOptions = {
-        multipleSelectRow: true,
-        clickToSelect: true,
-        detailFormatter: detailFormatter,
-        columns: [
-            {
-                checkbox: true,
-                align: 'center',
-                valign: 'middle',
-                class: '',
-                sortable: false,
-                clickToSelect: false,
-            },
-            {
-                title: 'Active',
-                align: 'center',
-                valign: 'middle',
-                class: '',
-                clickToSelect: false,
-                formatter: activeFormatter
-            },
-            {
-                title: 'Date',
-                field: 'date',
-                align: 'center',
-                valign: 'middle',
-                sortable: true,
-                formatter: datatimeFormatter
-            },
-            {
-                title: 'Temp. (C)',
-                field: 'temperatureC',
-                align: 'center',
-                valign: 'middle',
-                sortable: true
-            },
-            {
-                title: 'Temp. (F)',
-                field: 'temperatureF',
-                align: 'center',
-                valign: 'middle',
-                sortable: true
-            },
-            {
-                title: 'Summary',
-                field: 'summary',
-                align: 'center',
-                valign: 'middle',
-                sortable: true
-            },
-            {
-                title: 'Actions',
-                align: 'center',
-                valign: 'middle',
-                class: '',
-                sortable: false,
-                clickToSelect: false,
-                formatter: rowEditFormatter
-            }
-        ]
-    };
-
     useEffect(() => {
+        setExtendableCollection(getExtendableCollection(props.data));
         initializeTable();
 
         const handleTableEvent = () => {
@@ -108,11 +52,14 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
             setSelectedRowIds(selections);
             // Your logic to save the data or perform other actions
         };
+
         $commonTable.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', handleTableEvent);
 
-        //$commonTable.on('all.bs.table', function (_e, name, args) {
-        //    console.log(name, args)
-        //});
+        window.handleCommonTableRowEdit = (id: string) => {
+            if (props.onEdit)
+                props.onEdit(id);
+        }
+
         return () => {
             // Cleanup: Remove event listener when the component is unmounted
             $commonTable.off('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', handleTableEvent);
@@ -125,24 +72,38 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
     }, [props.data])
 
     function getExtendableCollection(data: any[]) {
+        let updatedData: any[] = [];
         if (data.length > 0) {
-            return data.map((item, index) => ({
+            updatedData = data.map((item, index) => ({
                 ...item,
                 rowIndex: index,
                 rowState: false,
                 selected: false
             }));
         }
-        else {
-            return [];
-        }
+
+        return updatedData;
     }
 
     function initializeTable() {
+        if (props.onEdit) {
+            let actionColumn = props.options.columns?.find(x => x.field == 'operate');
+            if (!actionColumn) {
+                props.options.columns?.push(
+                    {
+                        align: 'center',
+                        valign: 'middle',
+                        title: 'Actions',
+                        field: "operate",
+                        clickToSelect: false,
+                        formatter: operateFormatter,
+                    });
+            }
+        }
 
         $commonTable.bootstrapTable('destroy');
 
-        $commonTable.bootstrapTable(options);
+        $commonTable.bootstrapTable(props.options);
 
         setModelData();
     }
@@ -157,45 +118,6 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
 
     function getStateIdentifierFromProps() {
         return props?.stateIdentifier ? props.stateIdentifier : 'rowState';
-    }
-
-    function activeFormatter(value: any, row: any, _index: number) {
-        let styleClass = 'text-danger-glow blink';
-
-        if (value && (row.active || row[getStateIdentifierFromProps()])) {
-            styleClass = 'text-success-glow';
-        }
-        return `<div><i class="bi bi-circle-fill ${styleClass}"></i></div>`
-    };
-
-    function datatimeFormatter(value: any, _row: JQuery<HTMLElement>, _index: number) {
-        let date = new Date(value);
-
-        if (date.getFullYear() === -1899) {
-            return "--"
-        }
-
-        return date.toLocaleString();
-    }
-
-    function detailFormatter(_index: number, row: any, _element: JQuery<HTMLElement>) {
-        let html: any[] = [];
-        $.each(row, function (key: any, value: any) {
-            html.push(`<p><b>${key}:</b> ${value}</p>`)
-        })
-        return html.join('')
-    }
-
-    function getRowEditHtml(url: string, id: string | number) {
-        return [
-            `<a class="like" href="${url}/${id}" title="Edit" target="_blank">`,
-            '<i class="bi bi-pen"></i>',
-            '</a>  '
-        ].join('')
-    }
-
-    function rowEditFormatter(_index: number, _value: any, row: any) {
-        return getRowEditHtml('', row[props.identifier]);
     }
 
     function handleDelete() {
@@ -260,11 +182,19 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
         setIsDisabled(false);
     }
 
+    function operateFormatter(_value: any, row: any, _index: number) {
+        return [
+            `<a class="row-edit" title="Edit" onclick="handleCommonTableRowEdit('${row[props.identifier]}')" > `,
+            '<i class="bi bi-pen"></i>',
+            '</a>  '
+        ].join('')
+    }
+
     return (
         <div className="row paddingtop-10">
             <div className="col-lg-12 col-md-12 col-sm-12">
                 <div id="toolbar">
-                    <a className="btn btn-dark" href={props.createHRef}>
+                    <a className="btn btn-dark" onClick={props.onCreate}>
                         <i className="bi bi-plus-circle-fill"></i>
                         Create
                     </a>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Modal } from 'react-bootstrap';
+import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
-import '../assets/css/weather.css';
 import CommonModal from '../components/ui/CommonModal';
 import CommonTable from '../components/ui/CommonTable';
+import { BootstrapColumnsForecast } from '../entities/BootstrapTableColumnsForecast';
 import { Forecast, IForecast } from '../entities/Forecast';
-import { addOrUpdateForecast, bulkDeleteForecast, fetchForecastes } from '../store/features/forecastSlice';
+import { addOrUpdateForecast, bulkDeleteForecasts, bulkUpdateForecasts, fetchForecastes } from '../store/features/forecastSlice';
 import { AppDispatch, RootState, useAppDispatch } from '../store/store';
 
 export default function Weather() {
@@ -16,8 +16,6 @@ export default function Weather() {
     const error = useSelector((state: RootState) => state.forecast.error);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const [isReadOnly, setIsReadOnly] = useState(false);
 
     const [entityData, setEntityData] = useState<IForecast>(new Forecast());
 
@@ -64,73 +62,109 @@ export default function Weather() {
     const handleSave = () => {
         dispatch(addOrUpdateForecast(entityData));
         closeModal();
-        setIsReadOnly(false);
-    }
+    };
 
-    const handleUpdateForecast = (entity: IForecast) => {
+    const handleUpdate = (id: string) => {
+        let entity = forecasts.find(x => x.date.toLocaleString() == id);
+        if (entity) {
+            setEntityData(entity);
+        }
+        else {
+            // TODO display error message;
+        }
         openModal();
-        setEntityData(entity);
     }
 
-    const handleUpdateForecasts = (_entities: IForecast[]) => {
+    const handleBulkUpdate = (entities: IForecast[]) => {
+        dispatch(bulkUpdateForecasts(entities));
     }
 
-    const handleDeleteForecasts = (entity: IForecast[]) => {
-        dispatch(bulkDeleteForecast(entity));
+    const handleBulkDelete = (entities: IForecast[]) => {
+        dispatch(bulkDeleteForecasts(entities));
     }
 
-    const modalHeader =
-        <Modal.Header closeButton>
-            <Modal.Title>Forecast</Modal.Title>
-        </Modal.Header>;
-
-    const modalBody = (
-        <Modal.Body>
-            <div className="row">
-                <div className="col-lg-6 col-md-6 col-sm-6">
-                    <label htmlFor="date">Date *</label>
-                    <input type="datetime-local" id="date" className="form-control" value={entityData?.date?.toLocaleString()} onChange={handleInputChange} readOnly={isReadOnly} />
-                </div>
-                <div className="col-lg-6 col-md-6 col-sm-6">
-                    <label htmlFor="summary">Summary *</label>
-                    <input type="text" id="summary" className="form-input" value={entityData?.summary} onChange={handleInputChange} />
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-lg-6 col-md-6 col-sm-6">
-                    <label htmlFor="temperatureC">temperatureC *</label>
-                    <input type="number" id="temperatureC" className="form-input" value={entityData?.temperatureC} onChange={handleInputChange} />
-                </div>
-                <div className="col-lg-6 col-md-6 col-sm-6">
-                    <label htmlFor="temperatureF">temperatureF *</label>
-                    <input type="number" id="temperatureF" className="form-input" value={entityData?.temperatureF} onChange={handleInputChange} />
-                </div>
-            </div>
-        </Modal.Body>
-    );
-
-    const modalFooter = (
-        <Modal.Footer>
-            <button className="btn btn-dark btn-sm" onClick={handleSave}>
-                Save
-            </button>
-        </Modal.Footer>
-    );
+    const content =
+        <>
+            <Modal.Header closeButton>
+                <Modal.Title>Add Machine</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Row className="mb-12 paddingtop-10">
+                    <Form.Group as={Col} md="12">
+                        <Form.Label>Summary *</Form.Label>
+                    </Form.Group>
+                    <Form.Group as={Col} md="12" >
+                        <Form.Control
+                            required
+                            id="summary"
+                            type="textarea"
+                            onChange={handleInputChange}
+                            value={entityData?.summary}
+                        />
+                        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Please enter summary.
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                </Row>
+                <Row className="mb-12 paddingtop-10">
+                    <Form.Group as={Col} md="3" >
+                        <Form.Label>Temp (C.) *</Form.Label>
+                    </Form.Group>
+                    <Form.Group as={Col} md="3" >
+                        <Form.Control
+                            required
+                            id="temperatureC"
+                            type="number"
+                            placeholder="Enter temperature in celsius"
+                            onChange={handleInputChange}
+                            value={entityData?.temperatureC}
+                        />
+                        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Please enter numeric value.
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group as={Col} md="3" >
+                        <Form.Label>Temp (F.) *</Form.Label>
+                    </Form.Group>
+                    <Form.Group as={Col} md="3" >
+                        <Form.Control
+                            required
+                            id="temperatureF"
+                            type="number"
+                            placeholder="Enter temperature in fahrenheit"
+                            onChange={handleInputChange}
+                            value={entityData?.temperatureF}
+                        />
+                        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Please enter numeric value.
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                </Row>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button type="submit" onSubmit={handleSave}>Save</Button>
+            </Modal.Footer>
+        </>;
 
     return (
         <div className="row paddingtop-10">
             <CommonModal
                 isOpen={isModalOpen}
                 closeModal={closeModal}
-                header={modalHeader}
-                body={modalBody}
-                footer={modalFooter}
+                content={content}
+                formSubmit={handleSave}
             />
             <CommonTable
+                options={new BootstrapColumnsForecast()}
                 identifier="date"
-                createHRef="test"
                 data={forecasts}
-                onDelete={handleDeleteForecasts}
+                onCreate={openModal}
+                onEdit={handleUpdate}
+                onStatChange={handleBulkUpdate}
+                onDelete={handleBulkDelete}
             />
         </div>
     );

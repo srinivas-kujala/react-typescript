@@ -1,4 +1,4 @@
-import { IForecast } from "../interfaces/IForecats";
+import { IForecast } from "../entities/Forecast";
 import { BaseDataService } from "./baseDataService";
 
 class WeatherDataService extends BaseDataService<IForecast> {

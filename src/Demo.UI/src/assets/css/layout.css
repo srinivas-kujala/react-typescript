@@ -573,3 +573,27 @@ h3#modal-header-label {
     }
 
 /* #endregion float center*/
+
+/* #region navbar*/
+.navbar {
+    padding: 0px;
+    --bs-bg-opacity: 1;
+}
+/* #endregion navbar*/
+
+/* #region page-content */
+.page-content {
+    padding: 0% 5% 0% 5%;
+}
+/* #endregion page-content */
+
+/* #region form */
+form {
+    /*	color: #6C2BB5 !important;
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;*/
+    box-shadow: 20px 20px 50px grey;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+}
+/* #endregion form */

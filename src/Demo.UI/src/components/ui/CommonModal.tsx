@@ -1,16 +1,34 @@
-import React from 'react';
-import { Modal } from 'react-bootstrap';
-
+import React, { useState } from 'react';
+import { Form, Modal } from 'react-bootstrap';
 
 interface CommonModalProps {
     isOpen: boolean;
+    content: React.ReactNode;
     closeModal: () => void;
-    header: React.ReactNode;
-    body: React.ReactNode;
-    footer: React.ReactNode;
+    formSubmit: () => void;
 }
 
-const CommonModal: React.FC<CommonModalProps> = ({ isOpen, closeModal, header, body, footer }) => {
+const CommonModal: React.FC<CommonModalProps> = (
+    {
+        isOpen,
+        content,
+        closeModal,
+        formSubmit
+    }) => {
+
+    const [validated, setValidated] = useState(false);
+
+    const handleSubmit = (e: { currentTarget: any; preventDefault: () => void; stopPropagation: () => void; }) => {
+        const form = e.currentTarget;
+        if (form.checkValidity() === false) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        else {
+            formSubmit();
+        }
+        setValidated(true);
+    };
 
     return (
         <Modal
@@ -19,11 +37,9 @@ const CommonModal: React.FC<CommonModalProps> = ({ isOpen, closeModal, header, b
             backdrop="static"
             keyboard={false}
         >
-            <div>
-                <div>{header}</div>
-                <div>{body}</div>
-                <div>{footer}</div>
-            </div>
+            <Form noValidate validated={validated} onSubmit={handleSubmit}>
+                {content}
+            </Form>
         </Modal>
     );
 
