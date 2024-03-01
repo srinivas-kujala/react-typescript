@@ -11,9 +11,15 @@ const baseFolder =
         ? `${process.env.APPDATA}/ASP.NET/https`
         : `${process.env.HOME}/.aspnet/https`;
 
+console.log(`BaseFolder : ${baseFolder}`);
+
 const certificateArg = process.argv.map(arg => arg.match(/--name=(?<value>.+)/i)).filter(Boolean)[0];
+
+console.log(`CertificateArg : ${certificateArg}`);
+
 const certificateName = certificateArg ? certificateArg.groups?.value : "demo.ui";
 
+console.log(`Certificate Name: ${certificateName}`);
 if (!certificateName) {
     console.error('Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly.')
     process.exit(-1);
@@ -22,8 +28,10 @@ if (!certificateName) {
 const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
 const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
+console.log(`.pem file path : ${certFilePath}\n.key file path: ${keyFilePath}`);
+
 if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
-    if (0 !== child_process.spawnSync('dotnet', [
+    const response = child_process.spawnSync('dotnet', [
         'dev-certs',
         'https',
         '--export-path',
@@ -31,7 +39,11 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
         '--format',
         'Pem',
         '--no-password',
-    ], { stdio: 'inherit', }).status) {
+    ], { stdio: 'inherit', });
+
+    console.log(`Spawn [RSP]: ${JSON.stringify(response)}`);
+
+    if (0 !== response.status) {
         throw new Error("Could not create certificate.");
     }
 }
@@ -46,7 +58,7 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/weather': {
+            '^/api': {
                 target: 'https://localhost/demo/api',
                 secure: false
             }
