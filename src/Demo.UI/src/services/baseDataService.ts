@@ -1,4 +1,4 @@
-import { IOperationResult } from "../interfaces/IOperationResult"
+import { IOperationResult } from "../entities/OperationResult"
 
 export interface IBaseDataService<T> {
 

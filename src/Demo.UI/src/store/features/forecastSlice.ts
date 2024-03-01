@@ -126,11 +126,9 @@ export const ForecastSlice = createSlice({
     initialState,
     reducers: {
         addOrUpdateForecast: (state, action: PayloadAction<IForecast>) => {
-            let found: boolean = false;
             state.forecasts = [
                 ...state.forecasts.filter(forecast => {
                     if (forecast.date == action.payload.date) {
-                        found = true;
                     }
                     else
                         return forecast;

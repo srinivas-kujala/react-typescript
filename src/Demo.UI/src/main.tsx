@@ -1,3 +1,6 @@
+import 'bootstrap-table/dist/bootstrap-table.min.css'
+import 'bootstrap-table/index.d.ts'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'

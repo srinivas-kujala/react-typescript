@@ -1,5 +1,7 @@
 import 'bootstrap-table';
 import { BootstrapTableOptions } from 'bootstrap-table';
+import 'bootstrap-table/dist/bootstrap-table.min.js';
+import $ from 'jquery';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
