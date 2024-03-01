@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+Demo.UI.esproj
+Demo.UI.esproj.user
+obj
+nuget.config
+.vscode
+.gitignore

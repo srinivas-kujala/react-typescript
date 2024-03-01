@@ -1,0 +1,54 @@
+version: "3.9"
+services:
+
+    demo.ui-dc:
+        hostname: demo.ui-dc
+        container_name: demo.uicontainer
+        build: 
+            context: ./Demo.UI
+            dockerfile: Dockerfile
+        environment:
+            - SERVE=dev                
+        volumes:
+            - $APPDATA\ASP.NET\Https\:/root/.aspnet/https/:rw
+        ports:
+          - "3000:5173"
+        healthcheck:
+          test: ["CMD", "wget", "-f", "http://localhost:5173/"]
+          interval: 30s
+          timeout: 10s
+          retries: 10
+        platform: linux
+        mem_limit: 500MB
+        
+    #demo.ui:
+    #    hostname: demo.ui-dc
+    #    build:
+    #      context: ./Demo.UI
+    #      dockerfile: Dockerfile
+    #      args:
+    #          CERTIFICATE_PATH: APPDATA/ASP.NET/Https/demo.ui*
+    #    #environment:
+    #    #  - APPDATA=app
+    #    #  - SERVE=dev
+    #    #  - CERTIFICATE_NAME=Demo.UI
+    #      -
+    #    #volumes:
+    #        - C:\Certificates\:/app/localhost/asp.net/https:ro
+    #        #- C:\Users\sk251167\AppData\Roaming\ASP.NET\Https:/app/Demo.UI/ASP.NET/https
+    #        #- $APPDATA\ASP.NET\Https\:/app/Demo.UI/ASP.NET/https:ro
+    #        #- C:\Certificates\:/app/Demo.UI/ASP.NET/https:ro
+    #    #command: ["npm","run", "build",""]
+    #    ports:
+    #      - "3000:5173"
+    #    healthcheck:
+    #      test: ["CMD", "wget", "-f", "http://localhost:5173/"]
+    #      interval: 30s
+    #      timeout: 10s
+    #      retries: 10
+    #    platform: linux
+    #    mem_limit: 500MB
+    
+    # openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes
+    # openssl pkcs12 -in localhost.pfx -nocerts -out localhost.pem
+    # openssl rsa -in localhost.pem -out localhost.key
