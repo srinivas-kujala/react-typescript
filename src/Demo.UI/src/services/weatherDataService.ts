@@ -14,7 +14,7 @@ class WeatherDataService extends BaseDataService<IForecast> {
     //#region Public Methods
 
     async getForcastes(): Promise<IForecast[]> {
-        const response = await fetch('weather/getweatherforecast');
+        const response = await fetch('/api/weather/getweatherforecast');
         const data = await response.json();
         return data;
     }

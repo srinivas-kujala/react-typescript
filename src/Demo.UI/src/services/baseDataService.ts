@@ -34,7 +34,7 @@ export abstract class BaseDataService<T> implements IBaseDataService<T>{
     //#region Constructor
 
     constructor(apiEndpoint: string) {
-        this._ApiEndpoint = `api/${apiEndpoint}`;
+        this._ApiEndpoint = `/api/${apiEndpoint}`;
     }
 
     //#endregion
