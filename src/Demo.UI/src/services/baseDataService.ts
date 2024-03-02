@@ -27,7 +27,7 @@ export abstract class BaseDataService<T> implements IBaseDataService<T>{
 
     //#region
 
-    readonly _ApiEndpoint: string = "";
+    readonly _ApiEndpoint: string;
 
     //#endregion
 

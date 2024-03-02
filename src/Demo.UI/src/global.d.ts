@@ -2,7 +2,7 @@ interface Window {
 
     // #region  Methods
 
-    handleCommonTableRowEdit: (id: string) => void;
+    handleCommonTableRowEdit: (id: number) => void;
 
     // #endregion
 

@@ -45,13 +45,6 @@ export default class BootstrapTableOptionsBase implements IBootstrapTableOptions
             {
                 align: 'center',
                 valign: 'middle',
-                title: 'Name',
-                field: 'name',
-                sortable: true
-            },
-            {
-                align: 'center',
-                valign: 'middle',
                 title: 'Created By',
                 field: 'createdBy',
                 visible: false,

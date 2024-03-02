@@ -1,7 +1,7 @@
-import { IForecast } from "../entities/Forecast";
+import { IWeather } from "../entities/Weather";
 import { BaseDataService } from "./baseDataService";
 
-class WeatherDataService extends BaseDataService<IForecast> {
+class WeatherDataService extends BaseDataService<IWeather> {
 
     //#region Constructor
 
@@ -13,7 +13,7 @@ class WeatherDataService extends BaseDataService<IForecast> {
 
     //#region Public Methods
 
-    async getForcastes(): Promise<IForecast[]> {
+    async getForcastes(): Promise<IWeather[]> {
         const response = await fetch('/api/weather/getweatherforecast');
         const data = await response.json();
         return data;

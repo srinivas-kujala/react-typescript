@@ -1,11 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
-import { ForecastSlice } from "./features/forecastSlice";
+import { WeatherSlice } from "./features/WeatherSlice";
 
 export const store = configureStore({
     reducer: {
-        forecast: ForecastSlice.reducer,
-    }
+        weather: WeatherSlice.reducer,
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
 })
 
 export type RootState = ReturnType<typeof store.getState>

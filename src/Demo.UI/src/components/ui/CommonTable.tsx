@@ -1,7 +1,7 @@
 import 'bootstrap-table';
 import { BootstrapTableOptions } from 'bootstrap-table';
-import 'bootstrap-table/dist/bootstrap-table.min.js';
 import $ from 'jquery';
+import 'bootstrap-table/dist/bootstrap-table.min.js';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
@@ -23,7 +23,7 @@ interface ICommonTableProps<T> {
 
     onCreate?: () => void;
 
-    onEdit?: (id: string) => void | undefined;
+    onEdit?: (id: number) => void;
 
     onDelete?: (entities: T[]) => void
 
@@ -57,7 +57,7 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
 
         $commonTable.on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', handleTableEvent);
 
-        window.handleCommonTableRowEdit = (id: string) => {
+        window.handleCommonTableRowEdit = (id: number) => {
             if (props.onEdit)
                 props.onEdit(id);
         }

@@ -1,34 +1,13 @@
 import BootstrapTableOptionsBase from "./BootstrapTableOptionsBase";
 
-export class BootstrapColumnsForecast extends BootstrapTableOptionsBase {
+export class BootstrapColumnsWeather extends BootstrapTableOptionsBase {
 
     // #region Constructor
 
     constructor() {
         super();
 
-        this.columns = [
-            {
-                align: 'center',
-                valign: 'middle',
-                field: 'state',
-                checkbox: true
-            },
-            {
-                align: 'center',
-                valign: 'middle',
-                title: 'Active',
-                field: 'rowState',
-                sortable: true,
-                formatter: this.activeFormatter
-            },
-            {
-                align: 'center',
-                valign: 'middle',
-                title: 'Id',
-                field: 'rowIndex',
-                visible: false
-            },
+        this.columns = this.columns?.concat([
             {
                 align: 'center',
                 valign: 'middle',
@@ -58,7 +37,7 @@ export class BootstrapColumnsForecast extends BootstrapTableOptionsBase {
                 field: 'summary',
                 sortable: true
             }
-        ]
+        ])
     }
 
     // #endregion

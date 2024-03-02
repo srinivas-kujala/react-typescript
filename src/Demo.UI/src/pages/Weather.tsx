@@ -3,23 +3,23 @@ import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import CommonModal from '../components/ui/CommonModal';
 import CommonTable from '../components/ui/CommonTable';
-import { BootstrapColumnsForecast } from '../entities/BootstrapTableColumnsForecast';
-import { Forecast, IForecast } from '../entities/Forecast';
-import { addOrUpdateForecast, bulkDeleteForecasts, bulkUpdateForecasts, fetchForecastes } from '../store/features/forecastSlice';
+import { Weather as Entity, IWeather } from '../entities/Weather';
 import { AppDispatch, RootState, useAppDispatch } from '../store/store';
+import { addOrUpdateWeather, bulkDeleteWeathers, bulkUpdateWeathers, getWeatherApi, getWeathers } from '../store/features/WeatherSlice';
+import { BootstrapColumnsWeather } from '../entities/BootstrapColumnsWeather';
 
 export default function Weather() {
 
     const dispatch: AppDispatch = useAppDispatch();
-    const forecasts = useSelector((state: RootState) => state.forecast.forecasts);
-    const loading = useSelector((state: RootState) => state.forecast.loading);
-    const error = useSelector((state: RootState) => state.forecast.error);
+    const weathers = useSelector((state: RootState) => state.weather.weathers);
+    const loading = useSelector((state: RootState) => state.weather.loading);
+    const error = useSelector((state: RootState) => state.weather.error);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [entityData, setEntityData] = useState<IForecast>(new Forecast());
+    const [entityData, setEntityData] = useState<IWeather>(new Entity());
 
-    useEffect(() => { dispatch(fetchForecastes()) }, [dispatch]);
+    useEffect(() => { dispatch(getWeatherApi()) }, [dispatch]);
 
     if (loading) {
         return (
@@ -39,7 +39,7 @@ export default function Weather() {
 
     const openModal = (clear: boolean = false) => {
         if (clear) {
-            setEntityData(new Forecast());
+            setEntityData(new Entity());
         }
         setIsModalOpen(true);
     }
@@ -60,12 +60,12 @@ export default function Weather() {
     };
 
     const handleSave = () => {
-        dispatch(addOrUpdateForecast(entityData));
+        dispatch(addOrUpdateWeather(entityData));
         closeModal();
     };
 
-    const handleUpdate = (id: string) => {
-        let entity = forecasts.find(x => x.date.toLocaleString() == id);
+    const handleUpdate = (id: number) => {
+        let entity = weathers.find(x => x.id == id);
         if (entity) {
             setEntityData(entity);
         }
@@ -75,18 +75,18 @@ export default function Weather() {
         openModal();
     }
 
-    const handleBulkUpdate = (entities: IForecast[]) => {
-        dispatch(bulkUpdateForecasts(entities));
+    const handleBulkUpdate = (entities: IWeather[]) => {
+        dispatch(bulkUpdateWeathers(entities));
     }
 
-    const handleBulkDelete = (entities: IForecast[]) => {
-        dispatch(bulkDeleteForecasts(entities));
+    const handleBulkDelete = (entities: IWeather[]) => {
+        dispatch(bulkDeleteWeathers(entities));
     }
 
     const content =
         <>
             <Modal.Header closeButton>
-                <Modal.Title>Add Machine</Modal.Title>
+                <Modal.Title>Add Weather</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Row className="mb-12 paddingtop-10">
@@ -158,9 +158,10 @@ export default function Weather() {
                 formSubmit={handleSave}
             />
             <CommonTable
-                options={new BootstrapColumnsForecast()}
-                identifier="date"
-                data={forecasts}
+                options={new BootstrapColumnsWeather()}
+                identifier="id"
+                stateIdentifier="active"
+                data={weathers}
                 onCreate={openModal}
                 onEdit={handleUpdate}
                 onStatChange={handleBulkUpdate}

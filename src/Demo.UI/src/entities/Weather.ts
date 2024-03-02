@@ -1,4 +1,6 @@
-export interface IForecast {
+import { BaseEntity, IBaseEntity } from "./BaseEntity";
+
+export interface IWeather extends IBaseEntity {
 
     // #region Properties
 
@@ -13,20 +15,24 @@ export interface IForecast {
     // #endregion
 }
 
-export class Forecast implements IForecast {
+export class Weather extends BaseEntity implements IWeather {
 
     // #region Public Properties
 
-    date: Date;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
+    public date: Date;
+
+    public temperatureC: number;
+
+    public temperatureF: number;
+
+    public summary: string;
 
     // #endregion
 
     // #region Constructor
 
     constructor() {
+        super();
         this.date = new Date();
         this.temperatureC = 0;
         this.temperatureF = 0;
