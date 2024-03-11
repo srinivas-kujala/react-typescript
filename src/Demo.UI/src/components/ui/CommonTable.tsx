@@ -1,7 +1,8 @@
 import 'bootstrap-table';
 import { BootstrapTableOptions } from 'bootstrap-table';
-import $ from 'jquery';
 import 'bootstrap-table/dist/bootstrap-table.min.js';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import $ from 'jquery';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
@@ -211,20 +212,9 @@ const CommonTable: React.FC<ICommonTableProps<any>> = (props) => {
                 <table
                     id="commonTable"
                     data-toolbar="#toolbar"
-                    data-search="true"
-                    data-show-toggle="true"
-                    data-show-fullscreen="true"
-                    data-show-columns="true"
-                    data-show-columns-toggle-all="true"
-                    data-detail-view="true"
-                    data-show-export="true"
-                    data-click-to-select="true"
-                    data-minimum-count-columns={2}
                     data-show-pagination-switch="true"
                     data-pagination="true"
-                    data-id-field="id"
                     data-page-list="[10, 25, 50, 100, all]"
-                    data-show-footer="false"
                 ></table>
             </div>
         </div>

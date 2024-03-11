@@ -1,4 +1,5 @@
 import { BootstrapTableColumn, BootstrapTableOptions } from "bootstrap-table";
+import $ from 'jquery'
 
 export interface IBootstrapTableOptionsBase extends BootstrapTableOptions { }
 
@@ -12,11 +13,39 @@ export default class BootstrapTableOptionsBase implements IBootstrapTableOptions
 
     columns?: BootstrapTableColumn[];
 
+    search?: boolean;
+
+    showColumns?: boolean;
+
+    showColumnsToggleAll?: boolean;
+
+    showFullscreen?: boolean;
+
+    idField?: string;
+
+    showToggle?: boolean;
+
+    detailView?: boolean;
+
+    minimumCountColumns?: number;
+
+    showFooter?: boolean;
+
     // #endregion
 
     // #region Constructor
 
     constructor() {
+        this.idField = "id";
+        this.search = true;
+        this.showToggle = true;
+        this.showFullscreen = true;
+        this.showColumns = true;
+        this.showColumnsToggleAll = true;
+        this.detailView = true;
+        this.clickToSelect = true;
+        this.minimumCountColumns = 2;
+        this.showFooter = false;
         this.clickToSelect = true;
         this.multipleSelectRow = true;
         this.detailFormatter = this.tableDetailFormatter;
